@@ -1,0 +1,11 @@
+^M how to type
+Ctrl-V, Ctrl-M
+
+replace debug(psprintf(.....)); debug(psprintf(....), "matt");
+%s/\(debug.*\));/\1, \"matt\");/
+
+used commmand line
+vim -s script.vim edit.txt
+
+#Global serach empty line and delete
+g/^$/d

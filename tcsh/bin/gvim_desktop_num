@@ -1,0 +1,36 @@
+#!/usr/bin/tcsh -f
+
+### If binary path changed, modified the path here
+#if($USER != mattli) then
+#set gvim_bin = '/usr/bin/gvim/gvim -U ~mattli/.vimrc'
+#else
+#set gvim_bin = '/users/home91/mattli/opt/bin/gvim'
+#endif
+set gvim_bin = '/usr/bin/gvim'
+
+### Set the desktop number and vim server name
+set desktop_num = `xprop -root | grep ^_NET_CURRENT_DESKTOP | awk '{print $3+1}'`
+set vim_server_name = "DESKTOP_$desktop_num"
+
+
+### Check server exist
+set server_exist = `$gvim_bin --serverlist | grep -c $vim_server_name`
+
+
+if($server_exist) then
+  if($#argv != 0) then
+    $gvim_bin --servername $vim_server_name --remote-tab-silent $*
+  endif
+  #foreach name ($*)
+  #  if( -d $name) then
+  #    echo "directory $name"
+  #    $gvim_bin --servername $vim_server_name --remote-tab-silent $name
+  #  else
+  #    echo "file $name"
+  #    $gvim_bin --servername $vim_server_name --remote-tab-silent $name
+  #  endif
+  #end
+else
+  $gvim_bin --servername $vim_server_name -p $*
+endif
+

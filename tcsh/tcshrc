@@ -1,0 +1,26 @@
+
+# set are default prompt
+#Move prompt to .tup.cshrc
+#set prompt="%n@%m[%h]%# "  #history
+#set prompt="%n@%m[%c]%# "  #short path
+#set prompt="%n@%m[%/]%# "  #absolute path
+#Update title bar
+#path
+#set prompt="%{\033]0;%n@%m:%c03\007%}[%c]%# "
+#date/time
+#set prompt="%{\033]0;%n@%m:%c2\007%}[%Y-%W-%D %t]%# "
+set prompt="%{\033]0;%n@%m:%c02\007%}[%d %t]%# "
+
+
+#if(${?VIMRUNTIME} == 0) then
+#  source ~mattli/.my_env_setup/auto_proj
+#endif
+if ( -r $HOME/.tcshrc.alias) source $HOME/.tcshrc.alias
+if ( -r $HOME/.tcshrc.autosetup) source $HOME/.tcshrc.autosetup
+#
+#set path = (/users/home91/mattli/opt/bin $path)
+#setenv MANPATH /users/home91/mattli/opt/share/man:${MANPATH}
+#setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/users/home91/mattli/opt/lib:/users/home91/mattli/opt/lib64
+#setenv CSCOPE_EDITOR vim
+
+#stty erase 

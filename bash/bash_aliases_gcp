@@ -1,0 +1,32 @@
+#Editor
+function gvimsh(){
+  #echo "Hello"
+  desktopnum=$(xprop -root | grep ^_NET_CURRENT_DESKTOP | awk '{print $3+1}')
+  #echo "$desktopnum"
+  /usr/bin/gvim --servername GVIM$desktopnum --remote-tab-silent $*;
+  #echo "finish"
+}
+alias gvim="gvimsh"
+
+#Process
+alias myproc='ps aux|grep $USER'
+alias myarcjob='arc job-query user=$USER status=running'
+function kproc(){
+  /usr/bin/pkill -u $USER -f "$@"
+}
+
+#Files
+function findrm(){
+  find -name "$@" -exec rm {} \;
+}
+
+function diffd() {
+  diff --brief -r $1 $2 | sort > ~/.diff.log
+  view ~/.diff.log
+  rm ~/.diff.log
+}
+
+
+if [ -f ~/.bash_autosetup ]; then
+    . ~/.bash_autosetup
+fi

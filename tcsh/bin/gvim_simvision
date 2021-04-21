@@ -1,0 +1,2 @@
+DESKTOPNUM=`xprop -root | grep ^_NET_CURRENT_DESKTOP | awk '{print $3+1}'`
+vim -g --servername simvision$DESKTOPNUM --remote-tab-silent $@

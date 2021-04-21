@@ -1,0 +1,4 @@
+case $PWD/ in
+  /home/*) echo "home sweet home";;
+  *) echo "away from home";;
+esac

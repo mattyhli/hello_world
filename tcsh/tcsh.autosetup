@@ -1,0 +1,28 @@
+
+if ( ! $?prompt || $?VIMRUNTIME) then
+    exit
+endif
+
+#Used nested if else
+if(`pwd` =~ "$HOME/my_env_setup/*" | `pwd` =~ "$HOME/my_env_setup") then
+    echo "my_env_setup"
+else if(`pwd` =~ "$HOME/home_setup/*" | `pwd` =~ "$HOME/home_setup") then
+    echo "home_setup"
+else
+    echo "Others"
+endif
+
+#Used case/switch
+
+switch ("$PWD" )
+case "$HOME/my_env_setup/*" | "$HOME/my_env_setup" :
+    echo "my_env_setup at switch"
+    breaksw
+case "$HOME/home_setup/*" | "$HOME/home_setup" :
+    echo "home_setup at switch"
+    breaksw
+default :
+    echo "Others at switch"
+    breaksw
+endsw
+

@@ -1,0 +1,9 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =7
+let g:netrw_dirhist_1='/home/mattyhli/home_setup'
+let g:netrw_dirhist_2='/home/mattyhli/home_setup/bash'
+let g:netrw_dirhist_3='/home/mattyhli/home_setup/vimsetup/vim/plugin'
+let g:netrw_dirhist_4='/home/mattyhli/temp/uvm_gen-master/plugin'
+let g:netrw_dirhist_5='/home/mattyhli/home_setup/vimsetup/vim/plugin'
+let g:netrw_dirhist_6='/home/mattyhli/home_setup/vimsetup/vim/templates'
+let g:netrw_dirhist_7='/home/mattyhli/home_setup/vimsetup/vim/templates/uvm'

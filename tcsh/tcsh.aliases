@@ -1,0 +1,30 @@
+
+#Process
+#alias pawkn awk \'\{print \$2\}\'
+#alias kproc 'kill `ps aux |grep \!#:1 |grep ^$USER |grep -v grep| pawkn`'
+#alias kproc9 'kill -9 `ps aux |grep \!#:1 |grep ^$USER |grep -v grep| pawkn`'
+#using pkill
+alias akproc 'pkill -u $USER -f \!*'
+
+alias myproc 'ps aux | grep ^$USER'
+
+#Find
+#Delete file
+alias findrm 'find -name \!* -exec rm -f {} \;'
+alias findrmdir 'find -name \!* -exec rm -rf {} \;'
+alias findmyrm 'find -user $USER -exec rm -rf {} \;'
+
+#Diff 2 directory
+alias diffd 'diff --brief -r \!#:1 \!#:2 | sort > ~/.diff.log;view ~/.diff.log;rm ~/.diff.log'
+
+#git clean/diff/merge tools
+#keep ignore files
+alias gitclean 'git clean -f -d'
+#deepclean
+alias gitdeepclean 'git clean -f -d -x'
+#diff
+alias gitdiff 'git difftool --tool=vimdiff \!*'
+alias gitdiffy 'git difftool --tool=vimdiff -y \!*'
+alias gitmerge 'git mergetool --tool=vimdiff \!*'
+alias gitmergey 'git mergetool --tool=vimdiff -y \!*'
+

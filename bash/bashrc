@@ -1,0 +1,111 @@
+# .bashrc
+
+# If not running interactively, don't do anything
+# copy from bash example 
+#case $- in
+#    *i*) ;;
+#      *) return;;
+#esac
+
+
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+#if [ -f ~/.bash_aliases ]; then
+#    . ~/.bash_aliases
+#fi
+
+#\033 setup terminal window title bar \007
+case $TERM in
+    xterm*)
+       PS1="\[\033]0;\u@\h: \w\007\]bash\$ "
+       ;;
+    *)
+       PS1="bash\$ "
+       ;;
+esac
+
+#SSH and call tmux
+alias wst="ssh -X xm-06 -t 'tmux attach || tmux new'"
+
+#gvim to server
+alias gvim1="\gvim --servername DESKTOP_1 --remote-tab-silent"
+alias gvim2="\gvim --servername DESKTOP_2 --remote-tab-silent"
+alias gvim3="\gvim --servername DESKTOP_3 --remote-tab-silent"
+alias gvim4="\gvim --servername DESKTOP_4 --remote-tab-silent"
+
+#gvim function 
+function gvimsh(){
+  #echo "Hello"
+  desktopnum=$(xprop -root | grep ^_NET_CURRENT_DESKTOP | awk '{print $3+1}')
+  #echo "$desktopnum"
+  /usr/bin/gvim --servername GVIM$desktopnum --remote-tab-silent $*;
+  #echo "finish"
+}
+
+#Used sshvncviewer function
+#Usage : sshvncviewer xm-06:3
+#alias start_vnctunnel="ssh -L 5901:localhost:5903 -N -f xm-06"
+#alias stop_vnctunnel="ps aux |grep ssh |grep mattli |grep \"\-L\"| grep \"\-N\"| awk '{print \$2}' | xargs kill"
+
+sshvncviewer() {
+  for word in "$1"; do
+    IFS=":" read -a arr <<< "$word"
+  done
+
+  hostname="${arr[0]}";
+  portnum=$((${arr[1]}+5900));
+
+  #echo $hostname;
+  #echo $portnum;
+
+  ssh -L 5901:localhost:$portnum -N -f $hostname;
+  vncviewer localhost:1;
+  ps aux |grep ssh |grep 5901:localhost:$portnum | grep $hostname| awk '{print $2}' |xargs kill;
+}
+
+alias myproc='ps aux|grep $USER'
+alias myarcjob='arc job-query user=$USER status=running'
+
+function kproc(){
+  /usr/bin/pkill -u $USER -f "$@"
+}
+
+function findrm(){
+  find -name "$@" -exec rm {} \;
+}
+
+function diffd() {
+  diff --brief -r $1 $2 | sort > diff.log
+  view diff.log
+  rm diff.log
+}
+
+function p4diff2() {
+  p4 print $1 > $1.diff2
+  p4 print $2 > $2.diff2
+  vimdiff $1.diff2 $2.diff2
+  rm $1.diff2
+  rm $2.diff2
+}
+
+function p4annotate() {
+  p4 annotate $1 > $1.annotate
+  vim $1.annotate
+  rm $1.annotate
+}
+
+function p4annotate-c() {
+  p4 annotate -c $1 > $1.annotate
+  vim $1.annotate
+  rm $1.annotate
+}
+
+function p4log() {
+  #p4 filelog $1 | sed  's/@.*)//' | sed 's/change [0-9]*//g' > $1.filelog
+  p4 filelog $1 | sed  's/@.*)//' > $1.filelog
+  vim $1.filelog
+  rm $1.filelog
+}
+
+
