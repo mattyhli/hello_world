@@ -206,7 +206,7 @@ let b:match_words = '\<begin\>:\<end\>,'
                     \. '\<fork\>:\<join\>\|\<join_none\>\|\<join_any\>,'
                     \. '\<sequence\>:\<endsequence\>'
 
-"setlocal expandtab
-"setlocal shiftwidth=4
-"setlocal softtabstop=4
+setlocal expandtab
+setlocal shiftwidth=4
+setlocal softtabstop=4
 " vim: ts=2
