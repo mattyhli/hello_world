@@ -1,0 +1,63 @@
+*uvm_gen.txt*   Plugin for generate template for UVM
+
+Author:  Matt Li <mattyhli@gmail.com>
+==============================================================================
+Usage:
+
+Please keep <name> all lower case letters.
+You can generate vim helptag by :helptags ~/.vim/doc
+
+*UVMSeqItem* or  *UVMItem* <name>
+    It will generate a seq_item class extends uvm_seq_item
+
+*UVMConfig* <name>
+    It will generate a config class extends uvm_object
+
+*UVMSeq* <name>
+    It will generate a sequence class extends uvm_uvm_sequence #(seq_item)
+
+*UVMVSeq* <name> <parent_name>
+    It will generate a virtual sequence class. You need to provide a base_seq
+    name.
+
+*UVMVBSeq* <name> <parent_name>
+    It will generate a virtual base sequence class extends uvm_sequence
+
+*UVMDriver* <name> <req_seq_item>
+    It will generate a uvm_driver class extends uvm_driver #(req_seq_item)
+
+*UVMSqr* <name> <req_seq_item>
+    It will generate a uvm_sequencer class extends uvm_driver #(req_seq_item)
+
+*UVMMonitor* <name>
+    It will generate a uvm_monitor class extends uvm_monitor
+
+*UVMCov* <name> <trans>
+    It will generate a uvm_fcov class extends uvm_subscriber #(trans)
+    fcov: functional coverage for a transaction(seq_item)
+
+*UVMAgent* <name> <trans>
+    It will generate a uvm_agent class extends uvm_agent;
+    Put an uvm_analysis_port #(trans) inside agents connect mon.ap to env.
+
+*UVMSB* <name> <trans>
+    It will generate a uvm_scoreboard class extends uvm_scoreboard;
+    This one used default _imp #(trans)
+
+*UVMSB2* <name> <trans1> <trans2>
+    It will generate a uvm_scoreboard class extends uvm_scoreboard;
+    This one declare two new _imp
+
+*UVMEnv* <name> <cpuif>
+    It will generate a uvm_env class extends uvm_env;
+    Assume we have ral model. We also hook up a <cpuif> agents
+*UVMBTest* <name> <cpuif> <agent_name>
+    It will generate a uvm_base_test class extends uvm_test;
+    Assume we have ral model. We also hook up a <cpuif> agents
+    Assume we have another datapath agents.
+
+*UVMTest* <name> <parent>
+    It will generate a uvm_test class extends parent_test
+
+*UVMAdapter* <name>
+    It will generate a uvm_test class extends parent_test
