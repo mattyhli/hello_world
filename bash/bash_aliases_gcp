@@ -3,7 +3,12 @@ function gvimsh(){
   #echo "Hello"
   desktopnum=$(xprop -root | grep ^_NET_CURRENT_DESKTOP | awk '{print $3+1}')
   #echo "$desktopnum"
-  /usr/bin/gvim --servername GVIM$desktopnum --remote-tab-silent $*;
+  if [ $# -eq 0 ]; then
+      /usr/bin/vim;
+      echo "Argument missing after: \"--remote-tab-silent\""
+  else
+      /usr/bin/gvim --servername GVIM$desktopnum --remote-tab-silent $*;
+  fi
   #echo "finish"
 }
 alias gvim="gvimsh"
