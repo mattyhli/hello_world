@@ -1,40 +1,30 @@
-`ifndef _{:UPPERNAME:}_FCOV_MON__SV
-`define _{:UPPERNAME:}_FCOV_MON__SV
+`ifndef _{:UPPERNAME:}_FCOV__SV
+`define _{:UPPERNAME:}_FCOV__SV
 
-class {:NAME:}_fcov_mon extends uvm_subscriber #({:TRANS:});
+class {:NAME:}_fcov extends uvm_subscriber #({:NAME:}_seq_item);
 
-    `uvm_component_utils({:NAME:}_fcov_mon)
+    `uvm_component_utils({:NAME:}_fcov)
 
-    {:TRANS:} fcov_item;
+    {:NAME:}_seq_item fcov_item;
 
     covergroup {:NAME:}_cg;
-        option.name = "{:NAME:}_fcov_mon_group";
+        option.name = "{:NAME:}_fcov_group";
         option.comment = "";
         option.per_instance = 0;
-
-        //added coverpoint here
-        //Copy some example from uvm_cookbook.
-        //s:  coverpoint  fcov_item.src_id { 
-        //    bins  src[8]  =  {[0:7]}; 
-        //} 
-        //d:  coverpoint  fcov_item.dest_id {
-        //    bins  dest[8]  =  {[0:7]};
-        //}
     endgroup
 
     function new(string name, uvm_component parent);
         super.new(name,parent);
         {:NAME:}_cg = new();
-    endfunction // new
+    endfunction
     
-    extern function void write(input transaction t);
+    function void {:NAME:}_fcov::write(input {:NAME:}_seq_item t);
+    
+        `uvm_info(m_name, $sformatf("Received: %s", t.convert2string()), UVM_MEDIUM)
+        fcov_item = t;
+        {:NAME:}_cg.sample();
+    
+    endfunction
 endclass
 
-function void {:NAME:}_fcov_mon::write(input {:TRANS:} t);
-
-    `uvm_info(m_name, $sformatf("Received: %s", t.convert2string()), UVM_MEDIUM)
-    fcov_item = t;
-    {:NAME:}_cg.sample();
-
-endfunction
 `endif

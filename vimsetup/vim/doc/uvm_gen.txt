@@ -7,57 +7,840 @@ Usage:
 Please keep <name> all lower case letters.
 You can generate vim helptag by :helptags ~/.vim/doc
 
-*UVMSeqItem* or  *UVMItem* <name>
-    It will generate a seq_item class extends uvm_seq_item
+*UVMAgentPkg* <name>
+    `ifndef _{:UPPERNAME:}_AGENT_PKG__SV_
+    `define _{:UPPERNAME:}_AGENT_PKG__SV_
+    package {:NAME:}_agent_pkg;
+        import uvm_pkg::*;
+        `include "uvm_macros.svh"
+    
+        `include "{:NAME:}_intf.sv"
+        `include "{:NAME:}_seq_item.sv"
+        `include "{:NAME:}_agent_cfg.sv"
+        `include "{:NAME:}_sqr.sv"
+        `include "{:NAME:}_driver.sv"
+        `include "{:NAME:}_monitor.sv"
+        `include "{:NAME:}_fcov.sv"
+        `include "{:NAME:}_agent.sv"
+    
+        //include all sequence for this agent
+    endpackage
+    `endif
 
-*UVMConfig* <name>
-    It will generate a config class extends uvm_object
+*SVIntf* <name>
 
-*UVMSeq* <name>
-    It will generate a sequence class extends uvm_uvm_sequence #(seq_item)
+    `ifndef _{:UPPERNAME:}_INTF__SV_
+    `define _{:UPPERNAME:}_INTF__SV_
+    interface {:NAME:}_intf (input clk, reset);
+        //logic [3:0] a;
+        //logic [12:0] b;
+        //logic [127:0] c;
+        //logic [7:0] d;
+        
+        //modport master(input clk, reset, a, b, output c, inout d);
+        //modport slave(input clk, reset, c, output a, b, inout d);
+        //modport monitor(input clk, reset, a, b, c, d);
+    endinterface
+    `endif
 
-*UVMVSeq* <name> <parent_name>
-    It will generate a virtual sequence class. You need to provide a base_seq
-    name.
+*UVMItem* <name>
+    `ifndef _{:UPPERNAME:}_SEQ_ITEM__SV_
+    `define _{:UPPERNAME:}_SEQ_ITEM__SV_
+    class {:NAME:}_seq_item extends uvm_sequence_item;
+    
+        //Field automation
+        //check $UVM_HOME/uvm_object_defines.svh
+        //Scalar: 
+        //`uvm_field_int(ARG,FLAG)
+        //`uvm_field_real(ARG,FLAG)
+        //`uvm_field_enum(T,ARG,FLAG)
+        //`uvm_field_object(ARG,FLAG)
+        //`uvm_field_event(ARG,FLAG)
+        //`uvm_field_string(ARG,FLAG)
+        // FLAG:
+        //   UVM_ALL_ON     - Set all operations on.
+        //   UVM_DEFAULT    - This is the recommended set of flags
+        //   UVM_NOCOPY     - Do not copy this field.
+        //   UVM_NOCOMPARE  - Do not compare this field.
+        //   UVM_NOPRINT    - Do not print this field.
+        //   UVM_NOPACK     - Do not pack or unpack this field.
+    
+        //Used field macro is costly. But we did need copy/compare/print in most of case.
+        //Used scalar and some simple stuff. 
+        //`uvm_object_utils({:NAME:}_seq_item)
+        `uvm_object_utils_begin({:NAME:}_seq_item)
+        `uvm_object_utils_end
+    
+        function new(string name="{:NAME:}_seq_item");
+            super.new(name);
+        endfunction 
+    endclass 
+    `endif
 
-*UVMVBSeq* <name> <parent_name>
-    It will generate a virtual base sequence class extends uvm_sequence
+*UVMCfg* <name>
+    `ifndef _{:UPPERNAME:}_CFG__SV_
+    `define _{:UPPERNAME:}_CFG__SV_
+    class {:NAME:}_cfg extends uvm_object;
+    
+        `uvm_object_utils({:NAME:}_config)
+    
+        //DO NOT PUT THIS in CFG
+        //uvm_active_passive_enum is_active = UVM_ACTIVE;
+        //1. uvm_config_db can not take enum type
+        //2. cfg create at build_phase. Top level hard to pass down 
+        //   setting at child.build_phase.
 
-*UVMDriver* <name> <req_seq_item>
-    It will generate a uvm_driver class extends uvm_driver #(req_seq_item)
 
-*UVMSqr* <name> <req_seq_item>
-    It will generate a uvm_sequencer class extends uvm_driver #(req_seq_item)
+    
+        //If it is top level/sub system/agent
+        //It can has other config
+        //apb_master_config master_config;
+        //apb_slave_config slave_configs[$];
+    
+        function new(string name = "{:NAME:}_config");
+            super.new(name);
+        endfunction
+    
+        function pre_randomize();
+            super.pre_randomize();
+        endfunction
+    
+        function post_randomize();
+            super.post_randomize();
+        endfunction
+    endclass
+    `endif
 
-*UVMMonitor* <name>
-    It will generate a uvm_monitor class extends uvm_monitor
+*UVMSqr* <name>
+    `ifndef _{:UPPERNAME:}_SQR__SV_
+    `define _{:UPPERNAME:}_SQR__SV_
+    
+    class {:NAME:}_sqr extends uvm_sequencer #({:NAME:}_seq_item);
+        
+        // We usually do nothing. But here is a place holder
+        // You can put cfg/vif here if sequence needed.
+        // If nothing needed we can just instantiate at env/agent
+        // uvm_sequencer#({:NAME:}_seq_item) {:NAME:}_sequencer_h;
+    
+        // Provide implementations of virtual methods such as get_type_name and create
+        `uvm_component_utils({:NAME:}_sqr)
+        
+        // Constructor which calls super.new() with appropriate parameters.
+        function new (string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction : new
+        
+    endclass
+    `endif 
 
-*UVMCov* <name> <trans>
-    It will generate a uvm_fcov class extends uvm_subscriber #(trans)
-    fcov: functional coverage for a transaction(seq_item)
+*UVMDrv* <name>
+    `ifndef _{:UPPERNAME:}_DRIVER__SV_
+    `define _{:UPPERNAME:}_DRIVER__SV_
+    class {:NAME:}_driver extends uvm_driver #({:NAME:}_seq_item);
+    
+        `uvm_component_utils({:NAME:}_driver)
+    
+        virtual {:NAME:}_if vif;
+        {:NAME:}_agent_cfg m_cfg;
+        
+        virtual function new (string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction : new
+        
+        virtual function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if (m_cfg == null) begin
+                if (!uvm_config_db#({:NAME:}_agent_cfg)::get(this, "", "{:NAME:}_agent_cfg", m_cfg)) begin
+                    `uvm_error(get_type_name(), "{:NAME:}_agent_cfg not set for this component")
+                end
+            end
+        endfunction
+        
+        virtual function void connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+            if (!uvm_config_db#(virtual {:NAME:}_if)::get(this, "", "{:NAME:}_if", vif)) begin
+                `uvm_error(get_type_name(),{"virtual interface must be set for: ",get_full_name(),".vif"})
+            end
+        endfunction
+        
+        virtual task run_phase(uvm_phase phase);
+        
+            //We should divid to several task. for reset/drive-data/idle and etc.
+        
+            //If we only send req without send back rsp
+            //seq_item_port.get_next_item(req); //try_next_item(req)
+            //driver_tranfer(req);
+            //seq_item_port.item_done();
+        
+            //If we send req with rsp.
+            //seq_item_port.get_next_item(req);
+            //$cast(rsp, req.clone());
+            //rsp.set_id_info(req);
+            //driver_tranfer(rsp);
+            //seq_item_port.item_done();
+            //seq_item_port.put_response(rsp);
+        
+            //Mentor suggest anther method to get rsp
+            //seq_item_port.get(req); //peek(req)
+            //driver_tranfer(req);
+            //$cast(rsp, req.clone());
+            //rsp.set_id_info(req);
+            //seq_item_port.item_done();
+            //seq_item_port.put(rsp);
+        
+        endtask
+    endclass
+    `endif 
 
-*UVMAgent* <name> <trans>
-    It will generate a uvm_agent class extends uvm_agent;
-    Put an uvm_analysis_port #(trans) inside agents connect mon.ap to env.
+*UVMMon* <name>
+    `ifndef _{:UPPERNAME:}_MONITOR__SV_
+    `define _{:UPPERNAME:}_MONITOR__SV_
+    
+    class {:NAME:}_monitor extends uvm_monitor;
+    
+        `uvm_component_utils({:NAME:}_monitor)
+    
+        uvm_analysis_port #({:NAME:}_seq_item) ap;
+    
+        virtual {:NAME:}_intf vif;
+        {:NAME:}_agent_cfg m_cfg;
+        
+        protected int unsigned num_transactions = 0;
+        
+        // The following property holds the transaction information currently
+        // being captured (by the collect_address_phase and data_phase methods). 
+        {:NAME:}_seq_item trans_collected;
+        
+        function new (string name, uvm_component parent);
+            super.new(name, parent);
+            ap = new("ap", this);
+        endfunction : new
+        
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if (m_cfg == null) begin
+                if (!uvm_config_db#({:NAME:}_agent_cfg)::get(this, "", "{:NAME:}_agent_cfg", m_cfg)) begin
+                    `uvm_error(get_type_name(), "{:NAME:}_agent_cfg not set for this component")
+                end
+            end
+        endfunction
+        
+        function void connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+            if (!uvm_config_db#(virtual {:NAME:}_intf)::get(this, "", "{:NAME:}_intf", vif)) begin
+                `uvm_error(get_type_name(), {"virtual interface must be set for: ", get_full_name(), ".vif"})
+            end
+        endfunction
+        
+        virtual task run_phase(uvm_phase phase);
+            //waiting for reset done
+            //forever loop start to collect info
+            trans_collected = {:NAME:}_seq_item::type_id::create("trans_collected");
+            //write to ap
+            ap.write(trans_collected);
+            `uvm_info(get_type_name(), $sformatf("Transfer collected :\n%s", trans_collected.sprint()), UVM_MEDIUM)
+            num_transactions++;
+        endtask
+        
+        virtual function void report_phase(uvm_phase phase);
+            super.report_phase(phase);
+            `uvm_info(get_type_name(), $sformatf("The {:NAME:}_monitor collected %0d {:NAME:}_seq_item", num_transactions), UVM_LOW);
+        endfunction
+    endclass
+    `endif 
 
-*UVMSB* <name> <trans>
-    It will generate a uvm_scoreboard class extends uvm_scoreboard;
-    This one used default _imp #(trans)
+*UVMFCov* <name>
+    `ifndef _{:UPPERNAME:}_FCOV__SV
+    `define _{:UPPERNAME:}_FCOV__SV
+    
+    class {:NAME:}_fcov extends uvm_subscriber #({:NAME:}_seq_item);
+    
+        `uvm_component_utils({:NAME:}_fcov)
+    
+        {:NAME:}_seq_item fcov_item;
+    
+        covergroup {:NAME:}_cg;
+            option.name = "{:NAME:}_fcov_group";
+            option.comment = "";
+            option.per_instance = 0;
+    
+            //added coverpoint here
+            //Copy some example from uvm_cookbook.
+            //s:  coverpoint  fcov_item.src_id { 
+            //    bins  src[8]  =  {[0:7]}; 
+            //} 
+            //d:  coverpoint  fcov_item.dest_id {
+            //    bins  dest[8]  =  {[0:7]};
+            //}
+        endgroup
+    
+        function new(string name, uvm_component parent);
+            super.new(name,parent);
+            {:NAME:}_cg = new();
+        endfunction
+        
+        function void {:NAME:}_fcov::write(input {:NAME:}_seq_item t);
+        
+            `uvm_info(m_name, $sformatf("Received: %s", t.convert2string()), UVM_MEDIUM)
+            fcov_item = t;
+            {:NAME:}_cg.sample();
+        
+        endfunction
+    endclass
+    `endif
 
-*UVMSB2* <name> <trans1> <trans2>
-    It will generate a uvm_scoreboard class extends uvm_scoreboard;
-    This one declare two new _imp
+*UVMAgent* <name>
+    `ifndef _{:UPPERNAME:}_AGENT__SV_
+    `define _{:UPPERNAME:}_AGENT__SV_
+    
+    class {:NAME:}_agent extends uvm_agent;
+    
+        `uvm_component_utils({:NAME:}_agent)
+    
+        uvm_analysis_port #({:NAME:}_seq_item) ap;
+    
+        //control setting do not put into m_cfg
+        uvm_active_passive_enum is_active = UVM_ACTIVE;
+        //virtual {:NAME:}_intf vif;
+        //bit has_functional_coverage = 0;
+        //bit has_scoreboard = 0;
+
+        //only random setting put here.
+        {:NAME:}_agent_cfg m_cfg;
+        
+        {:NAME:}_monitor m_monitor;
+        {:NAME:}_fcov m_fcov;
+        {:NAME:}_driver m_driver;
+    
+        //Two way to define {:NAME:}_sequencer
+        //1. Define a class in another file (prefer)
+        //   In case we need added config/vif or other stuff at sequencer.
+        //2. Type define in package file
+        //   uvm_sequencer#({:NAME:}_seq_item) {:NAME:}_sequencer;
+        {:NAME:}_sequencer sequencer_h;
+        
+        
+        function new (string name, uvm_component parent);
+          super.new(name, parent);
+        endfunction : new
+        
+        virtual function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+    
+            if (m_cfg == null) begin
+                if (!uvm_config_db#({:NAME:}_agent_cfg)::get(this, "", "{:NAME:}_agent_cfg", m_cfg)) begin
+                    `uvm_error(get_type_name(), "{:NAME:}_agent_cfg not set for this component")
+                end
+            end
+        
+            //set is_active base on m_cfg.
+            //is_active = m_cfg.is_active;
+             
+            m_monitor = {:NAME:}_monitor::type_id::create("m_monitor",this);
+            if(is_active == UVM_ACTIVE) begin
+              sequencer_h = {:NAME:}_sequencer::type_id::create("sequencer_h",this);
+              m_driver = {:NAME:}_driver::type_id::create("m_driver",this);
+            end
+        
+            if(has_functional_coverage)  begin 
+                m_fcov  = {:NAME:}_fcov::type_id::create("m_fcov",  this);
+            end
+        endfunction
+        
+        virtual function void {:NAME:}_agent::connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+    
+            ap = m_monitor.ap;
+            if (is_active == UVM_ACTIVE) begin
+              m_driver.seq_item_port.connect(sequencer_h.seq_item_export);
+            end
+        
+            if(has_functional_coverage)  begin 
+                m_monitor.ap.connect(m_fcov_monitor.analysis_export); 
+            end
+        endfunction 
+    endclass
+    `endif
+
+*UVMSeq* <name> <req>
+    `ifndef _{:UPPERNAME:}_SEQ__SV_
+    `define _{:UPPERNAME:}_SEQ__SV_
+    
+    class {:NAME:}_seq extends uvm_sequence #({:REQ:}_seq_item);
+    
+        `uvm_object_utils({:NAME:}_seq)
+    
+        function new (string name="{:NAME:}_seq");
+            super.new(name);
+        endfunction
+    
+        virtual task body();
+        
+            `uvm_info(get_type_name(), $sformatf("Starting Sequenece"), UVM_HIGH)
+            //using macro do all
+            `uvm_do(req)
+        
+            //Macro Way 1
+            //`uvm_do_with(req,{req.wr_en == 1;})
+            
+            //Macro Way 2
+            //`uvm_create(req)
+            //assert(req.randomize());
+            //`uvm_send(req); 
+            
+            //Macro Way 3
+            //`uvm_create(req)
+            //`uvm_rand_send(req) 
+        
+            //Macro Way 4
+            //`uvm_create(req)
+            //`uvm_rand_send_with(req,{req.rd_en == 1;})
+        
+            //using start/finish
+            //req = {:NAME:}_seq_item::type_id::create("req");
+            //start_item(req);
+            //if (!req.randomize()) begin
+            //    `uvm_error(get_type_name(), "randomization failure for req")
+            //end
+            //finish_item(req); 
+            //get_response(rsp); //optional
+        
+            //if repeat multiple time
+            //{:NAME:}_seq_item req_template;
+            //req_template = {:NAME:}_seq_item::type_id::create("req_template");
+            //$cast(req, req_template.clone());
+            //start_item(req);
+            //if (!req.randomize()) begin
+            //    `uvm_error(get_type_name(), "randomization failure for req")
+            //end
+            //finish_item(req); 
+        
+            //Get response
+            //req = {:NAME:}_seq_item::type_id::create("req");
+            //wait_for_grant();
+            //if (req.randomize() with { ... })begin
+            //    `uvm_error(get_type_name(), "randomization failure for req")
+            //end
+            //send_request(req);
+            //wait_for_item_done();
+            //get_response(res); //optional
+        
+            `uvm_info(get_type_name(), $sformatf("Sequenece done"), UVM_HIGH)
+        endtask
+    endclass
+    `endif
+
+*UVMEnvPkg* <name>
+    `ifndef _{:UPPERNAME:}_ENV_PKG__SV_
+    `define _{:UPPERNAME:}_ENV_PKG__SV_
+    
+    package {:NAME:}_env_pkg;
+        import uvm_pkg::*;
+        `include "uvm_macros.svh"
+    
+        //import agent here
+
+        //import sub-env here
+    
+        //import RAL (register model)
+    
+        `include "{:NAME:}_env_cfg.sv"
+        `include "{:NAME:}_vsqr.sv"
+        `include "{:NAME:}_env.sv"
+    
+        //include all sequence for this env
+    endpackage
+    `endif
+
+*UVMVSqr* <name>
+    `ifndef _{:UPPERNAME:}_VSQR__SV_
+    `define _{:UPPERNAME:}_VSQR__SV_
+    
+    class {:NAME:}_vsqr extends uvm_sequencer;
+        
+        `uvm_component_utils({:NAME:}_vsqr)
+    
+        //add agents sqrs here and 
+        //env will connect them at connection phase 
+        
+        function new (string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction : new
+        
+    endclass
+    `endif 
 
 *UVMEnv* <name> <cpuif>
-    It will generate a uvm_env class extends uvm_env;
-    Assume we have ral model. We also hook up a <cpuif> agents
-*UVMBTest* <name> <cpuif> <agent_name>
-    It will generate a uvm_base_test class extends uvm_test;
-    Assume we have ral model. We also hook up a <cpuif> agents
-    Assume we have another datapath agents.
+    `ifndef _{:UPPERNAME:}_ENV__SV_
+    `define _{:UPPERNAME:}_ENV__SV_
+    
+    class {:NAME:}_env extends uvm_env;
+    
+        // Configurations object
+        {:NAME:}_cfg m_cfg;
+        
+        //UVC Components
+        {:CPUIF:}_pkg::{:CPUIF:}_agent   {:CPUIF:}; // {:CPUIFUPPER:} UVC
+        //uart_pkg::uart_agent uart0; // UART UVC
+        //uart_ctrl_env      uart_ctrl0; // Module UVC
+        
+        // Virtual sequencer
+        {:NAME:}_vsqr m_vsqr;
+        
+        // UVM_REG - Register Model
+        {:NAME:}_reg_model reg_model;    // Register Model
+    
+        // Adapter sequence and predictor
+        reg_to_{:CPUIF:}_adapter reg2{:CPUIF:};   // Adapter Object REG to {:CPUIFUPPER:}
+        uvm_reg_predictor#({:CPUIF:}_seq_item) {:CPUIF:}_predictor;  // Precictor - {:CPUIFUPPER:} to REG
+        
+        `uvm_component_utils({:NAME:}_env)
+        
+        // Constructor - required UVM syntax
+        function new(input string name, input uvm_component parent=null);
+          super.new(name,parent);
+        endfunction
+        
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+        
+            // get configur or create it.
+            if (m_cfg == null) begin
+                if (!uvm_config_db#({:NAME:}_cfg)::get(this, "", "m_cfg", m_cfg)) begin
+                    `uvm_info(get_type_name(), "No {:NAME:}_cfg available, creating...", UVM_LOW)
+                    m_cfg = {:NAME:}_cfg::type_id::create("m_cfg", this);
+                    `uvm_info(get_type_name(), {"Printing m_cfg:\n", m_cfg.sprint()}, UVM_MEDIUM)
+                    if(!m_cfg.randomize()) begin
+                        `uvm_error(get_type_name(), "m_cfg randomize failed")
+                    end
+                end
+            end
+            //uvm_config_db#(<subenv>_cfg)::set(this, "<sub_env>", "m_cfg", m_<subenv>_cfg)
+            
+        
+            //UVM_REG - Create and configure the register model
+            if (m_cfg.reg_model == null) begin
+                // Only enable reg model coverage if enabled for the testbench
+                reg_model = {:NAME:}_reg_model::type_id::create("reg_model");
+                reg_model.build();  //NOTE: not same as build_phase: reg_model is an object
+                reg_model.lock_model();
+            end
+        
+            //assign register model to m_cfg
+            m_cfg.reg_model = reg_model;
+        
+            //Put configure reference to sub-components. 
+            //need sub-module used uvm_field_*. It hurts performance. 
+            //Try assign afer create in build phase
+            //uvm_config_object::set(this, "{:CPUIF:}", "m_cfg", m_cfg.{:CPUIF:}_cfg);
+            //uvm_config_object::set(this, "uart0", "m_cfg", m_cfg.uart_cfg);
+            //uvm_config_object::set(this, "uart_ctrl0", "m_cfg", m_cfg);
+            //uvm_config_object::set(this, "virtual_sequencer", "m_cfg", m_cfg);
+            //uvm_config_object::set(this, "uart_ctrl0", "{:CPUIF:}_slave_cfg", cfg.{:CPUIF:}_cfg.slave_configs[0]);
+        
+        
+            //We should used base_test put following code. test will not be re-used.
+            //Keep it here in case we need this.
+            if (reg_model.get_parent() == null) begin
+                //if (coverage_enable == 1) uvm_reg::include_coverage("*", UVM_CVR_ALL);
+                reg2{:CPUIF:} = reg_to_{:CPUIF:}_adapter::type_id::create("reg2{:CPUIF:}");
+                {:CPUIF:}_predictor = uvm_reg_predictor#({:CPUIF:}_seq_item)::type_id::create("{:CPUIF:}_predictor", this);
+            end
+            
+            // set the register model for the rest of the testbench
+            // maybe should hide into each module's cfg with correct hirachary. 
+            // uvm_config_object::set(this, "*", "reg_model", reg_model);
+            
+            // Create {:CPUIFUPPER:}, UART, Module UVC and Virtual Sequencer
+            {:CPUIF:}              = {:CPUIF:}_pkg::{:CPUIF:}_agent::type_id::create("{:CPUIF:}",this);
+            //uart0             = uart_pkg::uart_env::type_id::create("uart0",this);
+            //uart_ctrl0        = uart_ctrl_env::type_id::create("uart_ctrl0",this);
+        
+        
+        
+            m_vsqr = {:NAME:}_vsqr::type_id::create("m_vsqr",this);
+        
+            //Put configure reference to sub-components. 
+            //It avoid uvm_field_* 
+            {:CPUIF:}.m_cfg = m_cfg.m_{:CPUIF:}_cfg;
+            //uart0.cfg = m_cfg.uart_cfg;
+        
+        endfunction
+        
+          // UVM connect_phase
+        function void connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+            //UVM_REG - set the sequencer and adapter for the register model
+            
+            if (reg_model.get_parent() == null) begin
+                reg_model.default_map.set_sequencer({:CPUIF:}.master.sequencer, reg2{:CPUIF:});  //
+                {:CPUIF:}_predictor.map = reg_model.default_map;
+                {:CPUIF:}_predictor.adapter = reg2{:CPUIF:};
+            end
+        
+            // ***********************************************************
+            //  Hookup virtual sequencer to interface sequencers
+            // ***********************************************************
+            virtual_sequencer.{:CPUIF:}_seqr = {:CPUIF:}.master.sequencer;
+            //virtual_sequencer.uart_seqr =  uart0.Tx.sequencer;
+            
+            //SETUP THE UART SLAVE CONFIG
+            //uart_ctrl0.set_slave_config(cfg.{:CPUIF:}_cfg.slave_configs[0], 0);
+            
+            // ***********************************************************
+            // ***********************************************************
+            // Connect TLM ports
+            // ***********************************************************
+            //uart0.Rx.monitor.frame_collected_port.connect(uart_ctrl0.monitor.uart_rx_in);
+            //uart0.Tx.monitor.frame_collected_port.connect(uart_ctrl0.monitor.uart_tx_in);
+            //{:CPUIF:}.bus_monitor.ap.connect(uart_ctrl0.monitor.{:CPUIF:}_in);
+            //{:CPUIF:}.bus_monitor.ap.connect(uart_ctrl0.{:CPUIF:}_in);
+            //predictor two options.
+            //predictor connect to sub-block predictor
+            //{:CPUIF:}.bus_monitor.ap.connect(uart_ctrl0.{:CPUIF:}_predictor.bus_in);
+            //predictor connect to predictor here
+            {:CPUIF:}.bus_monitor.ap.connect({:CPUIF:}_predictor.bus_in);
+            
+            // ***********************************************************
+            // Connect the dut_cfg ports
+            // ***********************************************************
+            //uart_ctrl0.uart_cfg_out.connect(uart0.dut_cfg_port_in);
+        
+        endfunction
+    endclass
+    `endif
 
-*UVMTest* <name> <parent>
-    It will generate a uvm_test class extends parent_test
+*UVMVBS* <name>
+    `ifndef _{:UPPERNAME:}_BASE_SEQ__SV_
+    `define _{:UPPERNAME:}_BASE_SEQ__SV_
+    
+    class {:NAME:}_base_seq extends uvm_sequnece;
+        //This is a virtual sequence. We don't need a special seq_item
+    
+        //Using this will not have uvm print function.
+        `uvm_object_utils({:NAME:}_base_seq)
+    
+        //Virtual Sequencer (Collection of sequencers)
+        //We do this at base virtual sequence
+        `uvm_declare_p_sequencer({:NAME:}_vsqr)
+        //macro is expensive.
+        //Implement a init_vseq at base_test to do the connection.
+        //Need to carefull control m_cfg between block level/ss level
+        //{:NAME:}_vsqr m_vsqr;
+        //{:NAME:}_env_cfg m_cfg;
+        //For DUT init sequence (register read/write the DUT.)
+        //Maybe we just used uvm_sequence as parent
+        //Put register model inside and test need to put right path to seq.
+    
+        // Methods
+        function new (string name="{:NAME:}_base_seq");
+            super.new(name);
+        endfunction
 
-*UVMAdapter* <name>
-    It will generate a uvm_test class extends parent_test
+        virtual task body();
+        endtask
+    
+    endclass
+    `endif
+
+*UVMVSeq* <name> <parent>
+    `ifndef _{:UPPERNAME:}_SEQ__SV_
+    `define _{:UPPERNAME:}_SEQ__SV_
+    
+    class {:NAME:}_seq extends {:PNAME:}_seq;
+    
+        //Using this will not have uvm print function.
+        `uvm_object_utils({:NAME:}_seq)
+    
+        //Virtual Sequencer (Collection of sequencers)
+        //We do this at base virtual sequence
+        //`uvm_declare_p_sequencer(uart_ctrl_virtual_sequencer)
+    
+        //Child sequence we can call some sequence inside this seq
+        // APB sequences
+        //apb_config_seq config_seq;
+        //apb_a2u_seq a2u_seq;
+        // UART sequences
+        //uart_u2a_seq u2a_seq;
+    
+        // Methods
+        function new (string name="{:NAME:}_seq");
+            super.new(name);
+        endfunction
+    
+        task body();
+            //uvm_reg_data_t desired_value;
+            //uvm_reg_data_t rdata;
+            //uvm_reg_data_t wdata;
+            //uvm_status_e status;
+        
+            //base virtual sequenece do nothing or just init stuff.
+        
+            `uvm_info(get_type_name(), $sformatf("Starting Sequenece"), UVM_HIGH)
+            //a2u_seq = apb_a2u_seq::type_id::create("a2u_seq");
+            //a2u_seq.randomize();
+            //a2u_seq.start(vsqr.apb_seqr);
+        
+            //u2a_seq = uart_u2a_seq::type_id::create("u2a_seq");
+            //u2a_seq.randomize();
+            //u2a_seq.start(vsqr.uart_seqr);
+        
+            //Register
+            //m_cfg.reg_model.....path.write(status, wdata);
+            //m_cfg.reg_model.....path.read(status, rdata);
+        
+            //desired_value  = m_cfg.reg_model.....path.field.get();
+            //m_cfg.reg_model.....path.field.set(1);
+            //m_cfg.reg_model.....path.update(status);
+        
+            `uvm_info(get_type_name(), $sformatf("Sequenece done"), UVM_HIGH)
+        endtask
+    endclass
+    `endif
+
+
+*UVMTestPkg* <name>
+    `ifndef _{:UPPERNAME:}_TEST_PKG__SV_
+    `define _{:UPPERNAME:}_TEST_PKG__SV_
+    
+    package {:NAME:}_test_pkg;
+        import uvm_pkg::*;
+        `include "uvm_macros.svh"
+    
+        //import pkgs here
+        import {:NAME:}_env_pkg::*;
+    
+        //include sequence cross mutliple env ?
+    
+        //include base_test
+        `include "{:NAME:}_base_test.sv"
+    
+        //include tests
+    
+    endpackage
+    `endif
+
+*UVMBTest* <name>
+    `ifndef _{:UPPERNAME:}_BASE_TEST__SV_
+    `define _{:UPPERNAME:}_BASE_TEST__SV_
+    
+    class {:NAME:}_base_test extends uvm_test;
+    
+        `uvm_component_utils({:NAME:}_base_test)
+        
+        //test class only handle top level clk/reset stuff.
+        //Others should hide inside env for re-used purpose.
+    
+        {:NAME:}_env m_env;
+        {:NAME:}_env_cfg m_env_cfg;
+    
+        virtual clk_rst_bfm clk_reset_vif;
+    
+        function new(string name = "{:NAME:}_base_test", uvm_component parent = null);
+            super.new(name, parent);
+        endfunction
+    
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+        
+            if (!uvm_config_db#(virtual clk_rst_bfm)::get(this, "", "clk_rst_bfm", clk_reset_vif)) begin
+                `uvm_error(get_type_name(), "clk_rst_bfm did not setup correctly at tb/uvm_test")
+            end
+    
+            m_env_cfg = {:NAME:}_env_cfg::type_id::create("m_env_cfg");
+            uvm_config_db#({:NAME:}_env_cfg)::set(this, "m_env", "m_cfg", m_env_cfg);
+        
+            m_env = {:NAME:}_env::type_id::create("m_env", this);
+        endfunction
+    
+        function void build_phase(uvm_phase phase);
+            clk_reset_vif.setting();
+        endfunction
+    
+        task run_phase(uvm_phase phase);
+            super.run_phase();
+            phase.raise_objection(this, "Test Started");
+    
+            phase.drop_objection(this, "Test Finished");
+        endtask
+    endclass: {:NAME:}_base_test
+    `endif
+
+*UVMTest* <name>
+    `ifndef _{:UPPERNAME:}_TEST__SV_
+    `define _{:UPPERNAME:}_TEST__SV_
+    class {:NAME:}_test extends {:PNAME:}_test;
+    
+      `uvm_component_utils({:NAME:}_test)
+    
+    
+        function new(string name = "{:NAME:}_test", uvm_component parent = null);
+            super.new(name, parent);
+    
+            //Override type here
+            //set_type_override_by_type(origin...get_type(), new...get_type());
+    
+            //Print out for debug
+            //uvm_vactory factory;
+            //factory = uvm_factory::get();
+            //factory.print();
+        endfunction
+        
+        task run_phase(uvm_phase phase);
+            super.run_phase();
+        
+            //sample_seq_a seq_a = sample_seq_a::type_id::create("seq_a");
+            //init_vseq(seq_a);
+            //sample_seq_a seq_b = sample_seq_b::type_id::create("seq_a");
+            //init_vseq(seq_b);
+            
+            phase.raise_objection(this, "Test Started");
+            //seq_a.start();
+            //#100;
+            //seq_b.start();
+            //#100;
+            phase.drop_objection(this, "Test Finished");
+        
+        endtask
+    endclass: {:NAME:}_test
+`endif
+
+*UVMR2B* <name>
+    `ifndef REG2{:UPPERNAME:}_ADAPTER__SV
+    `define REG2{:UPPERNAME:}_ADAPTER__SV
+    
+    class reg2{:NAME:}_adapter extends uvm_reg_adapter;
+    
+        `uvm_object_utils(reg2{:NAME:}_adapter)
+        
+        function new(string name = "reg2{:NAME:}_adapter");
+            super.new(name);
+        endfunction 
+        
+        virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
+            {:NAME:}_seq_item {:NAME:};
+            
+            {:NAME:} = {:NAME:}_seq_item::type_id::create("{:NAME:}");
+            {:NAME:}.kind = (rw.kind == UVM_READ) ? {:NAME:}_seq_item::READ : {:NAME:}_seq_item::WRITE;
+            {:NAME:}.addr = rw.addr;
+            {:NAME:}.data = rw.data;
+            
+            return {:NAME:};
+        endfunction
+        
+        virtual function void bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
+            {:NAME:}_seq_item {:NAME:};
+            
+            if (!$cast({:NAME:},bus_item)) begin
+              `uvm_fatal("NOT_{:UPPERNAME:}_TYPE","Provided bus_item is not of the correct type")
+              return;
+            end
+            rw.kind = {:NAME:}.kind == {:NAME:}_seq_item::READ ? UVM_READ : UVM_WRITE;
+            rw.addr = {:NAME:}.addr;
+            rw.data = {:NAME:}.data;
+            rw.status = UVM_IS_OK;
+        endfunction
+    endclass
+    `endif
+
+
