@@ -18,7 +18,7 @@ class {:NAME:}_fcov extends uvm_subscriber #({:NAME:}_seq_item);
         {:NAME:}_cg = new();
     endfunction
     
-    function void {:NAME:}_fcov::write(input {:NAME:}_seq_item t);
+    function void write(input {:NAME:}_seq_item t);
     
         `uvm_info(m_name, $sformatf("Received: %s", t.convert2string()), UVM_MEDIUM)
         fcov_item = t;

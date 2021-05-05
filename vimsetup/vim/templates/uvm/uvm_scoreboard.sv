@@ -3,26 +3,19 @@
 
 class {:NAME:}_scoreboard extends uvm_scoreboard;
 
-    // This TLM port is used to connect the scoreboard to the monitor
-    uvm_analysis_imp#({:TRANS:}, {:NAME:}_scoreboard) imp;
+    uvm_analysis_imp#({:NAME:}_seq_item, {:NAME:}_scoreboard) imp;
     
-    // Provide UVM automation and utility methods
     `uvm_component_utils({:NAME:}_scoreboard)
     
-    // Constructor - required syntax for UVM automation and utilities
     function new (string name, uvm_component parent);
         super.new(name, parent);
-        // Construct the TLM interface
         imp = new("imp", this);
     endfunction
     
-    // write method must implement for 
-    extern virtual function void write({:TRANS:} transfer);
+    virtual function void write({:NAME:}_seq_item transfer);
+    endfunction
    
 endclass
 
-// TLM write() implementation
-function void {:NAME:}_scoreboard::write({:TRANS:} transfer);
-endfunction : write
 
 `endif

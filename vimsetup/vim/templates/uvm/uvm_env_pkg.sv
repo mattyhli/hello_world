@@ -5,6 +5,8 @@ package {:NAME:}_env_pkg;
     import uvm_pkg::*;
     `include "uvm_macros.svh"
 
+    import {:CPUIF:}_agent_pkg::*;
+
     `include "{:NAME:}_env_cfg.sv"
     `include "{:NAME:}_vsqr.sv"
     `include "{:NAME:}_env.sv"

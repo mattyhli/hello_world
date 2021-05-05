@@ -156,23 +156,36 @@ function! UVMSeq(name, req)
     call <SID>TExpand("UPPERNAME", l:uppername)
 endfunction
 
-function! UVMEnvPkg(name)
+function! UVMEnvPkg(name, cpuif)
     let l:template_filename = "uvm_env_pkg.sv"
     let l:template = s:default_template_dir . "/" . l:template_filename
     let l:uppername = toupper(a:name)
 
     call <SID>TLoadCmd(l:template)
     call <SID>TExpand("NAME", a:name)
+    call <SID>TExpand("CPUIF", a:cpuif)
     call <SID>TExpand("UPPERNAME", l:uppername)
 endfunction
 
-function! UVMVSqr(name)
+function! UVMECfg(name, cpuif)
+    let l:template_filename = "uvm_env_config.sv"
+    let l:template = s:default_template_dir . "/" . l:template_filename
+    let l:uppername = toupper(a:name)
+
+    call <SID>TLoadCmd(l:template)
+    call <SID>TExpand("NAME", a:name)
+    call <SID>TExpand("CPUIF", a:cpuif)
+    call <SID>TExpand("UPPERNAME", l:uppername)
+endfunction
+
+function! UVMVSqr(name, cpuif)
     let l:template_filename = "uvm_vsqr.sv"
     let l:template = s:default_template_dir . "/" . l:template_filename
     let l:uppername = toupper(a:name)
 
     call <SID>TLoadCmd(l:template)
     call <SID>TExpand("NAME", a:name)
+    call <SID>TExpand("CPUIF", a:cpuif)
     call <SID>TExpand("UPPERNAME", l:uppername)
 endfunction
 
@@ -228,6 +241,26 @@ function! UVMBTest(name)
     call <SID>TExpand("UPPERNAME", l:uppername)
 endfunction
 
+function! UVMATestPkg(name)
+    let l:template_filename = "uvm_agent_test_pkg.sv"
+    let l:template = s:default_template_dir . "/" . l:template_filename
+    let l:uppername = toupper(a:name)
+
+    call <SID>TLoadCmd(l:template)
+    call <SID>TExpand("NAME", a:name)
+    call <SID>TExpand("UPPERNAME", l:uppername)
+endfunction
+
+function! UVMABTest(name)
+    let l:template_filename = "uvm_agent_base_test.sv"
+    let l:template = s:default_template_dir . "/" . l:template_filename
+    let l:uppername = toupper(a:name)
+
+    call <SID>TLoadCmd(l:template)
+    call <SID>TExpand("NAME", a:name)
+    call <SID>TExpand("UPPERNAME", l:uppername)
+endfunction
+
 function! UVMTest(name, parent)
     let l:template_filename = "uvm_test.sv"
     let l:template = s:default_template_dir . "/" . l:template_filename
@@ -239,6 +272,36 @@ function! UVMTest(name, parent)
     call <SID>TExpand("UPPERNAME", l:uppername)
 endfunction
 
+function! UVMMake(name)
+    let l:template_filename = "uvm_make.f"
+    let l:template = s:default_template_dir . "/" . l:template_filename
+
+    call <SID>TLoadCmd(l:template)
+    call <SID>TExpand("NAME", a:name)
+endfunction
+
+function! UVMTb(name, cpuif)
+    let l:template_filename = "uvm_tb.sv"
+    let l:template = s:default_template_dir . "/" . l:template_filename
+    let l:uppername = toupper(a:name)
+
+    call <SID>TLoadCmd(l:template)
+    call <SID>TExpand("NAME", a:name)
+    call <SID>TExpand("CPUIF", a:cpuif)
+    call <SID>TExpand("UPPERNAME", l:uppername)
+endfunction
+
+function! UVMATb(name, cpuif)
+    let l:template_filename = "uvm_agent_tb.sv"
+    let l:template = s:default_template_dir . "/" . l:template_filename
+    let l:uppername = toupper(a:name)
+
+    call <SID>TLoadCmd(l:template)
+    call <SID>TExpand("NAME", a:name)
+    call <SID>TExpand("CPUIF", a:cpuif)
+    call <SID>TExpand("UPPERNAME", l:uppername)
+endfunction
+
 function! UVMR2B(name)
     let l:template_filename = "uvm_reg2x_adapter.sv"
     let l:template = s:default_template_dir . "/" . l:template_filename
@@ -246,6 +309,28 @@ function! UVMR2B(name)
 
     call <SID>TLoadCmd(l:template)
     call <SID>TExpand("NAME", a:name)
+    call <SID>TExpand("UPPERNAME", l:uppername)
+endfunction
+
+function! UVMSB(name)
+    let l:template_filename = "uvm_scoreboard.sv"
+    let l:template = s:default_template_dir . "/" . l:template_filename
+    let l:uppername = toupper(a:name)
+
+    call <SID>TLoadCmd(l:template)
+    call <SID>TExpand("NAME", a:name)
+    call <SID>TExpand("UPPERNAME", l:uppername)
+endfunction
+
+function! UVMSB2(name, trans1, trans2)
+    let l:template_filename = "uvm_scoreboard2.sv"
+    let l:template = s:default_template_dir . "/" . l:template_filename
+    let l:uppername = toupper(a:name)
+
+    call <SID>TLoadCmd(l:template)
+    call <SID>TExpand("NAME", a:name)
+    call <SID>TExpand("TRANS1", a:trans1)
+    call <SID>TExpand("TRANS2", a:trans2)
     call <SID>TExpand("UPPERNAME", l:uppername)
 endfunction
 
@@ -263,15 +348,23 @@ command -nargs=1 UVMMon call UVMMon("<args>")
 command -nargs=1 UVMFCov call UVMFCov("<args>")
 command -nargs=1 UVMAgent call UVMAgent("<args>")
 command -nargs=+ -complete=customlist,<SID>ReturnTypesList UVMSeq call UVMSeq(<f-args>)
-command -nargs=1 UVMEnvPkg call UVMEnvPkg("<args>")
-command -nargs=1 UVMVSqr call UVMVSqr("<args>")
+command -nargs=+ -complete=customlist,<SID>ReturnTypesList UVMEnvPkg call UVMEnvPkg(<f-args>)
+command -nargs=+ -complete=customlist,<SID>ReturnTypesList UVMECfg call UVMECfg(<f-args>)
+command -nargs=+ -complete=customlist,<SID>ReturnTypesList UVMVSqr call UVMVSqr(<f-args>)
 command -nargs=+ -complete=customlist,<SID>ReturnTypesList UVMEnv call UVMEnv(<f-args>)
 command -nargs=1 UVMVBS call UVMVBS("<args>")
 command -nargs=+ -complete=customlist,<SID>ReturnTypesList UVMVSeq call UVMVSeq(<f-args>)
 command -nargs=1 UVMTestPkg call UVMTestPkg("<args>")
 command -nargs=1 UVMBTest call UVMBTest("<args>")
+command -nargs=1 UVMATestPkg call UVMATestPkg("<args>")
+command -nargs=1 UVMABTest call UVMABTest("<args>")
 command -nargs=+ -complete=customlist,<SID>ReturnTypesList UVMTest call UVMTest(<f-args>)
+command -nargs=1 UVMMake call UVMMake("<args>")
+command -nargs=+ -complete=customlist,<SID>ReturnTypesList UVMTb call UVMTb(<f-args>)
+command -nargs=+ -complete=customlist,<SID>ReturnTypesList UVMATb call UVMATb(<f-args>)
 command -nargs=1 UVMR2B call UVMR2B("<args>")
+command -nargs=1 UVMSB call UVMSB("<args>")
+command -nargs=+ -complete=customlist,<SID>ReturnTypesList UVMSB2 call UVMSB2(<f-args>)
 
 
 "command -nargs=1 UVMSeqItem call UVMSeqItem("<args>")

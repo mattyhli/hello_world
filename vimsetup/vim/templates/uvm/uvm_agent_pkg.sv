@@ -5,7 +5,6 @@ package {:NAME:}_agent_pkg;
     import uvm_pkg::*;
     `include "uvm_macros.svh"
 
-    `include "{:NAME:}_intf.sv"
     `include "{:NAME:}_seq_item.sv"
     `include "{:NAME:}_agent_cfg.sv"
     `include "{:NAME:}_sqr.sv"
@@ -16,4 +15,6 @@ package {:NAME:}_agent_pkg;
 
     //include all sequence for this agent
 endpackage
+`include "{:NAME:}_intf.sv"
+
 `endif

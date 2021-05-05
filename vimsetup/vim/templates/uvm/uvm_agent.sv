@@ -13,7 +13,7 @@ class {:NAME:}_agent extends uvm_agent;
     {:NAME:}_monitor m_monitor;
     {:NAME:}_fcov m_fcov;
     {:NAME:}_driver m_driver;
-    {:NAME:}_sequencer m_sqr;
+    {:NAME:}_sqr m_sqr;
     
     
     function new (string name, uvm_component parent);
@@ -24,14 +24,14 @@ class {:NAME:}_agent extends uvm_agent;
         super.build_phase(phase);
 
         if (m_cfg == null) begin
-            if (!uvm_config_db#({:NAME:}_agent_cfg)::get(this, "", "{:NAME:}_agent_cfg", m_cfg)) begin
+            if (!uvm_config_db#({:NAME:}_agent_cfg)::get(this, "", "m_cfg", m_cfg)) begin
                 `uvm_error(get_type_name(), "{:NAME:}_agent_cfg not set for this component")
             end
         end
     
         m_monitor = {:NAME:}_monitor::type_id::create("m_monitor",this);
         if(is_active == UVM_ACTIVE) begin
-          m_sqr = {:NAME:}_sequencer::type_id::create("m_sqr",this);
+          m_sqr = {:NAME:}_sqr::type_id::create("m_sqr",this);
           m_driver = {:NAME:}_driver::type_id::create("m_driver",this);
         end
     
@@ -40,7 +40,7 @@ class {:NAME:}_agent extends uvm_agent;
         end
     endfunction
     
-    virtual function void {:NAME:}_agent::connect_phase(uvm_phase phase);
+    virtual function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
 
         ap = m_monitor.ap;
@@ -49,7 +49,7 @@ class {:NAME:}_agent extends uvm_agent;
         end
     
         if(m_cfg.has_functional_coverage)  begin 
-            m_monitor.ap.connect(m_fcov_monitor.analysis_export); 
+            m_monitor.ap.connect(m_fcov.analysis_export); 
         end
     endfunction 
 endclass

@@ -14,7 +14,6 @@ You can generate vim helptag by :helptags ~/.vim/doc
         import uvm_pkg::*;
         `include "uvm_macros.svh"
     
-        `include "{:NAME:}_intf.sv"
         `include "{:NAME:}_seq_item.sv"
         `include "{:NAME:}_agent_cfg.sv"
         `include "{:NAME:}_sqr.sv"
@@ -430,7 +429,7 @@ You can generate vim helptag by :helptags ~/.vim/doc
     endclass
     `endif
 
-*UVMEnvPkg* <name>
+*UVMEnvPkg* <name> <cpuif>
     `ifndef _{:UPPERNAME:}_ENV_PKG__SV_
     `define _{:UPPERNAME:}_ENV_PKG__SV_
     
@@ -438,21 +437,45 @@ You can generate vim helptag by :helptags ~/.vim/doc
         import uvm_pkg::*;
         `include "uvm_macros.svh"
     
-        //import agent here
-
-        //import sub-env here
-    
-        //import RAL (register model)
+        import {:CPUIF:}_agent_pkg::*;
     
         `include "{:NAME:}_env_cfg.sv"
         `include "{:NAME:}_vsqr.sv"
         `include "{:NAME:}_env.sv"
-    
-        //include all sequence for this env
     endpackage
     `endif
 
-*UVMVSqr* <name>
+*UVMECfg* <name> <cpuif>
+    `ifndef _{:UPPERNAME:}_CFG__SV_
+    `define _{:UPPERNAME:}_CFG__SV_
+    class {:NAME:}_env_cfg extends uvm_object;
+    
+        `uvm_object_utils({:NAME:}_env_cfg)
+    
+        //template agent used this.
+        bit has_functional_coverage = 1;
+    
+        //template env used this
+        rand {:CPUIF:}_agent_cfg m_{:CPUIF:}_cfg;
+    
+    
+        function new(string name = "{:NAME:}_env_cfg");
+            super.new(name);
+            m_{:CPUIF:}_cfg = {:CPUIF:}_agent_cfg::type_id::create("m_{:CPUIF:}_cfg");
+        endfunction
+    
+        function void pre_randomize();
+            super.pre_randomize();
+        endfunction
+    
+        function void post_randomize();
+            super.post_randomize();
+        endfunction
+    endclass
+    `endif
+
+
+*UVMVSqr* <name> <cpuif>
     `ifndef _{:UPPERNAME:}_VSQR__SV_
     `define _{:UPPERNAME:}_VSQR__SV_
     
@@ -460,14 +483,13 @@ You can generate vim helptag by :helptags ~/.vim/doc
         
         `uvm_component_utils({:NAME:}_vsqr)
     
-        //add agents sqrs here and 
-        //env will connect them at connection phase 
-        
+        {:CPUIF:}_sqr m_{:CPUIF:}_sqr;
+    
         function new (string name, uvm_component parent);
             super.new(name, parent);
         endfunction : new
-        
     endclass
+    
     `endif 
 
 *UVMEnv* <name> <cpuif>
@@ -766,6 +788,74 @@ You can generate vim helptag by :helptags ~/.vim/doc
     endclass: {:NAME:}_base_test
     `endif
 
+*UVMATestPkg* <name>
+    `ifndef _{:UPPERNAME:}_TEST_PKG__SV_
+    `define _{:UPPERNAME:}_TEST_PKG__SV_
+    
+    package {:NAME:}_test_pkg;
+        import uvm_pkg::*;
+        `include "uvm_macros.svh"
+    
+        //import pkgs here
+        import {:NAME:}_agent_pkg::*;
+    
+        //include sequence cross mutliple env ?
+    
+        //include base_test
+        `include "{:NAME:}_base_test.sv"
+    
+        //include tests
+    
+    endpackage
+    `endif
+
+*UVMABTest* <name>
+    `ifndef _{:UPPERNAME:}_BASE_TEST__SV_
+    `define _{:UPPERNAME:}_BASE_TEST__SV_
+    
+    class {:NAME:}_base_test extends uvm_test;
+    
+        `uvm_component_utils({:NAME:}_base_test)
+        
+        //test class only handle top level clk/reset stuff.
+        //Others should hide inside env for re-used purpose.
+    
+        {:NAME:}_agent m_env;
+        {:NAME:}_agent_cfg m_env_cfg;
+        {:NAME:}_sqr m_env_sqr;
+    
+    
+        function new(string name = "{:NAME:}_base_test", uvm_component parent = null);
+            super.new(name, parent);
+        endfunction
+    
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+        
+            m_env_cfg = {:NAME:}_agent_cfg::type_id::create("m_env_cfg");
+            uvm_config_db#({:NAME:}_agent_cfg)::set(this, "m_env*", "m_cfg", m_env_cfg);
+        
+            m_env = {:NAME:}_agent::type_id::create("m_env", this);
+        endfunction
+    
+        function void connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+    
+            m_env_sqr = m_env.m_sqr;
+        endfunction
+    
+        task run_phase(uvm_phase phase);
+            super.run_phase(phase);
+            phase.raise_objection(this, "Test Started");
+    
+            phase.drop_objection(this, "Test Finished");
+        endtask
+    endclass
+    `endif
+
+
+
+
 *UVMTest* <name>
     `ifndef _{:UPPERNAME:}_TEST__SV_
     `define _{:UPPERNAME:}_TEST__SV_
@@ -805,6 +895,88 @@ You can generate vim helptag by :helptags ~/.vim/doc
     endclass: {:NAME:}_test
 `endif
 
+
+*UVMMake* <name>
+    //begin_of_dot_f_file
+    //Put include path if not in same directory.
+    //+incdir+tb_classes
+
+    //complile package and tb.
+    {:NAME:}_agent_pkg.sv
+    {:NAME:}_env_pkg.sv
+    {:NAME:}_test_pkg.sv
+
+    {:NAME:}_intf.sv
+    {:NAME:}_tb.sv
+    //end_of_dot_f_file
+
+    command line may looks like this.
+    >vcs -ntb_opts uvm -kdb  -sverilog -f <name>.f 
+    or
+    >vcs -sverilog  +incdir+$UVM_HOME/src $UVM_HOME/src/uvm.sv \
+    $UVM_HOME/src/dpi/uvm_dpi.cc -CFLAGS -DVCS -f <name>.f 
+
+
+
+*UVMTb* <name> <cpuif>
+
+    `ifndef _{:UPPERNAME:}_TB__SV_
+    `define _{:UPPERNAME:}_TB__SV_
+    
+    module tb_top();
+    
+    import uvm_pkg::*;
+    `include "uvm_macros.svh"
+    import {:NAME}_test_pkg::*;
+    
+    {:CPUIF:}_intf {:CPUIF:}_intf_inst;
+    initial begin
+        uvm_config_db#(virtual {:CPUIF:}_intf)::set(uvm_root::get(), "uvm_test_top.env_h.{:CPUIF:}_agent_h.driver", "vif", {CPUIF:}_intf_inst.driver);
+        uvm_config_db#(virtual {:CPUIF:}_intf)::set(uvm_root::get(), "uvm_test_top.env_h.{:CPUIF:}_agent_h.monitor", "vif", {CPUIF:}_intf_inst.monitor);
+        uvm_config_db#(virtual {:CPUIF:}_intf)::set(uvm_root::get(), "uvm_test_top.env_h.{:CPUIF:}_agent_h", "vif", {CPUIF:}_intf_inst);
+    end
+
+    //here is solution for multiple instance
+    generate
+        for( i = 0; i < 3; i++)  begin : vif_loop
+            {:CPUIF:}_intf {:CPUIF:}_intf_inst;
+        	initial begin
+                uvm_config_db#(virtual {:CPUIF:}_intf)::set(uvm_root::get(), $sformatf("uvm_test_top.env_h.{:CPUIF:}_agent_h[%0d]", i), "vif", {CPUIF:}_intf_inst);
+        	end
+        end
+    endgenerate
+    //assign vif_loop[0].{:CPUIF:}_intf_inst.valid = valid;
+    
+    initial begin
+        run_test();
+    end
+    
+    endmodule
+    `endif
+
+*UVMATb* <name> <cpuif>
+    `ifndef _{:UPPERNAME:}_TB__SV_
+    `define _{:UPPERNAME:}_TB__SV_
+    
+    module tb_top();
+    
+    import uvm_pkg::*;
+    `include "uvm_macros.svh"
+    import {:NAME:}_test_pkg::*;
+    
+    {:CPUIF:}_intf {:CPUIF:}_intf_inst();
+    
+    initial begin
+        uvm_config_db#(virtual {:CPUIF:}_intf)::set(uvm_root::get(), "uvm_test_top.m_env*", "vif", {:CPUIF:}_intf_inst);
+    end
+    
+    initial begin
+        run_test();
+    end
+    
+    endmodule
+    `endif
+
 *UVMR2B* <name>
     `ifndef REG2{:UPPERNAME:}_ADAPTER__SV
     `define REG2{:UPPERNAME:}_ADAPTER__SV
@@ -843,4 +1015,54 @@ You can generate vim helptag by :helptags ~/.vim/doc
     endclass
     `endif
 
+*UVMSB* <name>
+    `ifndef _{:UPPERNAME:}_SCOREBOARD__SV_
+    `define _{:UPPERNAME:}_SCOREBOARD__SV_
+    class {:NAME:}_scoreboard extends uvm_scoreboard;
+    
+        uvm_analysis_imp#({:NAME:}_seq_item, {:NAME:}_scoreboard) imp;
+        
+        `uvm_component_utils({:NAME:}_scoreboard)
+        
+        function new (string name, uvm_component parent);
+            super.new(name, parent);
+            imp = new("imp", this);
+        endfunction
+        
+        virtual function void write({:NAME:}_seq_item transfer);
+        endfunction
+       
+    endclass
+    `endif
 
+*UVMSB2* <name> <trans1> <trans2>
+    `ifndef _{:UPPERNAME:}_SCOREBOARD__SV_
+    `define _{:UPPERNAME:}_SCOREBOARD__SV_
+    
+    //Better put following two line in packaage before this include
+    //Should move to package not put here.
+    //If others scoreborad need this they just used it inside the class
+    `uvm_analysis_imp_decl(_{:TRANS1:})
+    `uvm_analysis_imp_decl(_{:TRANS2:})
+    
+    class {:NAME:}_scoreboard extends uvm_scoreboard;
+    
+        uvm_analysis_imp_{:TRANS1:} #({:TRANS1:}, {:NAME:}_scoreboard) {:TRANS1:}_add;
+        uvm_analysis_imp_{:TRANS2:} #({:TRANS2:}, {:NAME:}_scoreboard) {:TRANS2:}_match;
+        
+        `uvm_component_utils({:NAME:}_scoreboard)
+        
+        function new (string name, uvm_component parent);
+            super.new(name, parent);
+            {:TRANS1:}_add = new("{:TRANS1:}_add", this);
+            {:TRANS2:}_match = new("{:TRANS2:}_match", this);
+        endfunction
+        
+        virtual function void write_{:TRANS1:}({:TRANS1:} transfer);
+        endfunction
+    
+        virtual function void write_{:TRANS2:}({:TRANS2:} transfer);
+        endfunction
+       
+    endclass
+    `endif

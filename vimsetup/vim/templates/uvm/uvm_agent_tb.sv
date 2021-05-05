@@ -10,7 +10,7 @@ import {:NAME:}_test_pkg::*;
 {:CPUIF:}_intf {:CPUIF:}_intf_inst();
 
 initial begin
-    uvm_config_db#(virtual {:CPUIF:}_intf)::set(uvm_root::get(), "uvm_test_top.m_env.m_{:CPUIF:}_agent*", "vif", {:CPUIF:}_intf_inst);
+    uvm_config_db#(virtual {:CPUIF:}_intf)::set(uvm_root::get(), "uvm_test_top.m_env*", "vif", {:CPUIF:}_intf_inst);
 end
 
 initial begin
