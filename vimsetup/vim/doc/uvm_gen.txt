@@ -2,10 +2,40 @@
 
 Author:  Matt Li <mattyhli@gmail.com>
 ==============================================================================
-Usage:
-
 Please keep <name> all lower case letters.
 You can generate vim helptag by :helptags ~/.vim/doc
+==============================================================================
+Command List
+
+1 . uvm_agent package           |UVMAgentPkg|
+2 . interface			|SVIntf|
+3 . uvm_sequence_item 		|UVMItem|
+4 . uvm config/uvm_object	|UVMCfg|
+5 . uvm_sequencer		|UVMSqr|
+6 . uvm_driver			|UVMDrv|
+7 . uvm_monitor			|UVMMon|
+8 . uvm coverag/uvm_subscriber	|UVMFCov|
+9 . uvm_agent			|UVMAgent|
+10. uvm_sequence		|UVMSeq|
+11. uvm_env packag		|UVMEnvPkg|
+12. uvm_env config		|UVMECfg|
+13. virtual sequencer		|UVMVSqr|
+14. uvm_env			|UVMEnv|
+15. base vsequence		|UVMVBS|
+16. virtual sequence		|UVMVSeq|
+17. uvm_test package(env)	|UVMTestPkg|
+18. uvm_base_test(env) 		|UVMBTest|
+19. uvm_test package(agent)	|UVMATestPkg|
+20. uvm_base_test(agent)	|UVMABTest|
+21. uvm_test extend base	|UVMTest|
+22. .f file template		|UVMMake|
+23. test_top(env)		|UVMTb|
+24. test_top(agent)		|UVMATb|
+25. uvm_reg2bus			|UVMR2B|
+26. uvm_scoreboard		|UVMSB|
+27. uvm_scoreboard(2 port)	|UVMSB2|
+
+==============================================================================
 
 *UVMAgentPkg* <name>
     `ifndef _{:UPPERNAME:}_AGENT_PKG__SV_
@@ -362,6 +392,22 @@ You can generate vim helptag by :helptags ~/.vim/doc
     `endif
 
 *UVMSeq* <name> <req>
+
+    //User code
+    //`uvm_do(sub_seq, {constraints }, priority)
+    //sub_seq.start(sqr, parent_seq, priority, call_pre_post);
+
+    //Following method are called
+    //
+    //sub_seq.pre_start();
+    //sub_seq.pre_body();
+    //  parent_seq.pre_do();
+    //  parent_seq.mid_do();
+    //sub_seq.body();
+    //  parent_seq.post_do();
+    //sub_seq.post_body();
+    //sub_seq.post_start();
+
     `ifndef _{:UPPERNAME:}_SEQ__SV_
     `define _{:UPPERNAME:}_SEQ__SV_
     

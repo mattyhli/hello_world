@@ -1,5 +1,5 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =8
+let g:netrw_dirhist_cnt =9
 let g:netrw_dirhist_1='/home/mattyhli/home_setup'
 let g:netrw_dirhist_2='/home/mattyhli/home_setup/bash'
 let g:netrw_dirhist_3='/home/mattyhli/home_setup/vimsetup/vim/plugin'
@@ -8,3 +8,4 @@ let g:netrw_dirhist_5='/home/mattyhli/home_setup/vimsetup/vim/plugin'
 let g:netrw_dirhist_6='/home/mattyhli/home_setup/vimsetup/vim/templates'
 let g:netrw_dirhist_7='/home/mattyhli/home_setup/vimsetup/vim/templates/uvm'
 let g:netrw_dirhist_8='/home/mattyhli/sbox/hello_world/vimsetup/vim/templates'
+let g:netrw_dirhist_9='/home/mattyhli/temp'
