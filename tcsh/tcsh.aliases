@@ -28,3 +28,9 @@ alias gitdiffy 'git difftool --tool=vimdiff -y \!*'
 alias gitmerge 'git mergetool --tool=vimdiff \!*'
 alias gitmergey 'git mergetool --tool=vimdiff -y \!*'
 
+##vi copy/paste through temp file.
+#run/cat temp vi file
+alias runvitmp 'source ~/.vitmp'
+alias catvitmp 'cat ~/.vitmp'
+alias runvitmp1 'source ~/.vitmp1'
+alias catvitmp1 'cat ~/.vitmp1'

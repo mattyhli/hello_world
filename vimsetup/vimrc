@@ -141,11 +141,6 @@ autocmd BufReadPost * if &readonly | setlocal nomodifiable | else | setlocal mod
 " if version >= 700 && has("gui_running")
 " endif
 if version >= 700
-    :nnoremap gf <C-W>gf
-    ":nnoremap gf <C-W>f
-    ":cab      e  tabe
-    ":tab sball    
-    
     " set up tab labels with tab number, buffer name, number of windows
     if has("gui_running")
       set tabpagemax=25
@@ -231,18 +226,12 @@ set laststatus=2
 let Tlist_Show_One_File=1
 "let Tlist_Display_Prototype=1
 "let Tlist_Show_Menu=1
-"source $VIMRUNTIME/mswin.vim
-"Copy to system clipboard not just for vim
-"set clipboard=unnamed
-"Window stype copy/paste
-"source $VIMRUNTIME/mswin.vim
-"This map is different from the one shown in vim documentation:
-":noremap <LeftRelease> "+y<LeftRelease>
 
-"augroup Systemverilog
-"  autocmd!
-"  autocmd FileType systemverilog setlocal omnifunc=syntaxcomplete#Complete foldmethod=indent
-"augroup END
+vmap <leader>y :w! ~/.vitmp<CR>
+nmap <leader>p :r! cat ~/.vitmp<CR>
+
+vmap <leader>y1 :w! ~/.vitmp1<CR>
+nmap <leader>p1 :r! cat ~/.vitmp1<CR>
 
 " Copyright stuff
 "autocmd bufnewfile *.C,*.h,*.c,*.cpp,*.sv,*.v,*.svh,*.sim so ~/.vim/company_c.txt

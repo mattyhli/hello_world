@@ -52,3 +52,9 @@ function diffd() {
 if [ -f ~/.bash_autosetup ]; then
     . ~/.bash_autosetup
 fi
+
+alias runvitmp='bash -i ~/.vitmp'
+alias catvitmp='cat ~/.vitmp'
+
+alias runvitmp1='bash -i ~/.vitmp1'
+alias catvitmp1='cat ~/.vitmp1'
