@@ -135,6 +135,8 @@ if !exists(":DiffOrig")
 		  \ | wincmd p | diffthis
 endif
 
+command Todo tabe ~/todo
+
 set cpo+=W
 autocmd BufReadPost * if &readonly | setlocal nomodifiable | else | setlocal modifiable | endif
 
@@ -164,7 +166,7 @@ if version >= 700
           
           let s .= (i == t ? '%#TabLineSel#' : '%#TabLine#')
           let s .= i . ':'
-          let s .= winnr . '/' . tabpagewinnr(i,'$')
+          "let s .= winnr . '/' . tabpagewinnr(i,'$')
           let s .= ' '
           let bufnr = buflist[winnr - 1]
           let file = bufname(bufnr)
