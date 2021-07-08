@@ -34,9 +34,9 @@ class {:NAME:}_base_test extends uvm_test;
 
     task run_phase(uvm_phase phase);
         super.run_phase(phase);
-        phase.raise_objection(this, "Test Started");
+        phase.raise_objection(this, "{:NAME:}_base_test Started");
 
-        phase.drop_objection(this, "Test Finished");
+        phase.drop_objection(this, "{:NAME:}_base_test Finished");
     endtask
 endclass
 `endif

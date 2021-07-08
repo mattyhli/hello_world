@@ -13,11 +13,11 @@ class {:NAME:}_test extends {:PNAME:}_test;
     endfunction
     
     task run_phase(uvm_phase phase);
-        super.run_phase();
+        super.run_phase(phase);
     
-        phase.raise_objection(this, "Test Started");
+        phase.raise_objection(this, "{:NAME:}_test Started");
 
-        phase.drop_objection(this, "Test Finished");
+        phase.drop_objection(this, "{:NAME:}_test Finished");
     endtask
 endclass: {:NAME:}_test
 
